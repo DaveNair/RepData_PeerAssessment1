@@ -1,16 +1,8 @@
----
-title: "PA1_template"
-author: "Dave Nair"
-date: "April 3, 2017"
-output: 
-    html_document:
-        keep_md: true
----
+# PA1_template
+Dave Nair  
+April 3, 2017  
 
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
-library(ggplot2)
-```
+
 
 
 
@@ -18,7 +10,8 @@ library(ggplot2)
 
 Hello all; I'll take this moment to set some globals for the Rmd file:
 
-```{r setoptions,echo=TRUE}
+
+```r
 knitr::opts_chunk$set(echo=TRUE,results='asis',cache=TRUE)
 ```
 
@@ -108,7 +101,8 @@ and confirmed), we can load the data via `read.csv()`. For now, we will
 *not* do anything with the NA's. I'd much rather leave them where they are 
 and deal with them when the situation comes up.
 
-```{r reading}
+
+```r
 RawActivity <- read.csv('activity.csv', stringsAsFactors=FALSE)
 ```
 
@@ -121,7 +115,8 @@ Since we'll be making only histograms and time-series plots (and using
 similar-looking data), I'm just going to define specific plotting 
 functions right here, which I'll call later, when I need to:
 
-```{r PlottingFuncs}
+
+```r
 PlotHistMeanMedian <- function(NumericVector, PlotTitle){
     hist(NumericVector, main=PlotTitle, xlab='Total Steps per Day', 
          breaks=10) # Note: the number of breaks was found after some visual checking
@@ -185,7 +180,8 @@ reporting the mean and median) should also be trivial.
 
 Having our plotting functions previously defined, here is the procedure for Q1:
 
-```{r q1}
+
+```r
 TotalStepsPerDay <- tapply(RawActivity$steps, 
     as.factor(RawActivity$date), 
     sum, na.rm=TRUE)
@@ -194,6 +190,8 @@ TotalStepsPerDay <- tapply(RawActivity$steps,
 PlotHistMeanMedian(TotalStepsPerDay, 
                    PlotTitle='Total Steps Per Day')
 ```
+
+![](PA1_template_files/figure-html/q1-1.png)<!-- -->
 
 
 
@@ -215,7 +213,8 @@ in the *legend* (and I didn't want to crowd the plot by writing it as text *on* 
 the "most active" interval is shown, the actual value of that interval is returned separately in the 
 code chunk below:
 
-```{r q2}
+
+```r
 AvgStepsPerInterval <- tapply(RawActivity$steps, 
     as.factor(RawActivity$interval),
 	mean, na.rm=TRUE)
@@ -226,9 +225,15 @@ Q1DF <- data.frame(StepsPerInterval=AvgStepsPerInterval,
 
 ## At which time interval do we see the most step activity?
 print(Q1DF$Interval[Q1DF$Steps==max(Q1DF$Steps)])
+```
 
+[1] 835
+
+```r
 PlotTimeSeries(Q1DF, Facet = FALSE)
 ```
+
+![](PA1_template_files/figure-html/q2-1.png)<!-- -->
 
 
 	
@@ -246,18 +251,24 @@ The first step of this was done in my analysis of the raw data, but
 here is a different way of showing that there are 2304 lines 
 with missing data:
 
-```{r checkNA}
+
+```r
 for (name in names(RawActivity)){
     print(paste(name, as.character(sum(is.na(RawActivity[name])))))
     }
 ```
+
+[1] "steps 2304"
+[1] "date 0"
+[1] "interval 0"
 
 For the purposes of this assignment, we will replace NA's with the mean 
 for that given 5-min interval, as suggested. Let's create our new, filled 
 dataset. To create this, we will be making (subsetting) a brand new one, and then 
 appending to it as we iterate through each possible interval.
 
-```{r fillNAs}
+
+```r
 ## First, we'll subset for activity WITHOUT NA vals
 FilledActivity <- RawActivity[!is.na(RawActivity$steps), ]
 ## Next, we'll iterate through each possible interval, 
@@ -275,19 +286,26 @@ for (Interval in as.numeric(names(AvgStepsPerInterval))){
 Let's make sure we *did* fill up the same-sized dataframe; i.e., 
 let's see if it has the same dimensions and if it has *any* NA values:
 
-```{r qcheck}
+
+```r
 dim(RawActivity)==dim(FilledActivity); sum(is.na(FilledActivity$steps))
 ```
 
+[1] TRUE TRUE
+[1] 0
+
 Now that all the NA vals have been taken care of, let's plot like how we did in question 1:
 
-```{r q3}
+
+```r
 NEWTotalStepsPerDay <- tapply(FilledActivity$steps, 
     as.factor(FilledActivity$date), 
     sum, na.rm=TRUE)
 PlotHistMeanMedian(NEWTotalStepsPerDay,
                    PlotTitle='Total Steps Per Day, with NA-Replacement')
 ```
+
+![](PA1_template_files/figure-html/q3-1.png)<!-- -->
 	
 # Question 4
 
@@ -300,7 +318,8 @@ Restated, with each step numbered:
 So let's add a weekday/weekend factor variable to our `FilledActivity` dataframe. 
 This should be straightforward and simple.
 
-```{r weekendFactor}
+
+```r
 WeekendNames = c('Saturday', 'Sunday')
 FilledActivity$Weekend <- factor( 
     weekdays(as.Date(FilledActivity$date)) %in% WeekendNames, 
@@ -318,7 +337,8 @@ than trying to get `ggplot2` to do all that, I'm just going to quickly
 create two sets and `rbind()` them into a pretty dataframe for my 
 previously defined `PlotTimeSeries()` function.
 
-```{r weekendAveraging}
+
+```r
 temp <- subset(FilledActivity, Weekend=='Weekday')
 wdAverages <- tapply( temp$steps,
                       as.factor(temp$interval),
@@ -340,7 +360,10 @@ And finally, let's send our `WeekendDF` into our `PlotTimeSeries(Facet=TRUE)` fu
 This factoring is *defined* in the function itself. 
 I.e., it cannot be facetted by any other category at this point:
 
-```{r q4}
+
+```r
 PlotTimeSeries( WeekendDF , 
 	Facet = TRUE)
-```	
+```
+
+![](PA1_template_files/figure-html/q4-1.png)<!-- -->
