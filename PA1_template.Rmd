@@ -125,9 +125,12 @@ functions right here, which I'll call later, when I need to:
 PlotHistMeanMedian <- function(NumericVector, PlotTitle){
     hist(NumericVector, main=PlotTitle, xlab='Total Steps per Day', 
          breaks=10) # Note: the number of breaks was found after some visual checking
+    Med = median(NumericVector, na.rm=TRUE); Mean = mean(NumericVector,na.rm=TRUE)
     abline(v=median(NumericVector, na.rm=TRUE), col='green', lwd=2)
     abline(v=mean(NumericVector, na.rm=TRUE), col='blue', lty=2, lwd=2)
-    legend("topright", col=c('green','blue'), legend=c('Median','Mean'), 
+    legend("topright", col=c('green','blue'), 
+           legend=c(paste(c('Median=',as.character(round(Med,digits=2))),collapse=''),
+                    paste(c('Mean=',as.character(round(Mean,digits=2))),collapse='')),
            lwd=2, lty=c(1,2))}
 
 PlotTimeSeries <- function(DataFrame, Facet=FALSE){
